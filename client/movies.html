@@ -1,59 +1,89 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>CineBook - Explore Movies</title>
-
-    <!-- Connect CSS -->
     <link rel="stylesheet" href="test.css">
+
+    <style>
+        .booking-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .booking-content {
+            background: white;
+            color: #222;
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .booking-content h2 {
+            margin-top: 0;
+        }
+
+        .booking-content input {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .booking-content button {
+            padding: 12px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+        }
+
+        #payNowBtn {
+            background: #176b45;
+            color: white;
+        }
+
+        #closeModalBtn {
+            background: #ddd;
+            color: #222;
+        }
+
+        #bookingMessage {
+            margin-top: 12px;
+            color: #c0392b;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- =========================
-         NAVIGATION BAR
-    ========================== -->
-
     <header>
-
         <h2>CineBook</h2>
-
         <nav>
-            <a href="test.html">Home</a>
+            <a href="index.html">Home</a>
             <a href="movies.html">Movies</a>
             <a href="#">About</a>
             <a href="#">Contact</a>
         </nav>
-
     </header>
 
-
-    <!-- =========================
-         MOVIES HERO SECTION
-    ========================== -->
-
     <section class="movies-hero">
-
         <h1>Explore Movies</h1>
-
-        <p>
-            Discover your next favourite movie
-            and book your cinema experience.
-        </p>
-
+        <p>Discover your next favourite movie and book your cinema experience.</p>
     </section>
 
-
-    <!-- =========================
-         SEARCH AND FILTER SECTION
-    ========================== -->
-
     <section class="movie-filters">
-
         <input
             type="text"
             id="searchInput"
@@ -61,186 +91,109 @@
         >
 
         <select id="genreFilter">
-
             <option value="all">All Genres</option>
-
             <option value="Action">Action</option>
-
             <option value="Adventure">Adventure</option>
-
             <option value="Drama">Drama</option>
-
             <option value="Sci-Fi">Sci-Fi</option>
-
             <option value="Thriller">Thriller</option>
-
         </select>
 
-        <button onclick="resetFilters()">
-            Reset
-        </button>
-
+        <button id="resetBtn">Reset</button>
     </section>
 
-
-    <!-- =========================
-         MOVIE LISTING SECTION
-    ========================== -->
-
     <section class="movies">
-
         <h2>Now Showing</h2>
 
         <div class="movie-container">
 
-
-            <!-- MOVIE 1 -->
-
             <div class="movie-card" data-genre="Action Adventure">
-
-                <img
-                    src="https://placehold.co/220x280?text=Avatar"
-                    alt="Avatar movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Avatar" alt="Avatar poster">
                 <h3>Avatar</h3>
-
                 <p>Action | Adventure</p>
-
                 <p>⭐ 7.9/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="avatar">Book Now</button>
             </div>
-
-
-            <!-- MOVIE 2 -->
 
             <div class="movie-card" data-genre="Sci-Fi Drama">
-
-                <img
-                    src="https://placehold.co/220x280?text=Interstellar"
-                    alt="Interstellar movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Interstellar" alt="Interstellar poster">
                 <h3>Interstellar</h3>
-
                 <p>Sci-Fi | Drama</p>
-
                 <p>⭐ 8.7/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="interstellar">Book Now</button>
             </div>
-
-
-            <!-- MOVIE 3 -->
 
             <div class="movie-card" data-genre="Action Thriller">
-
-                <img
-                    src="https://placehold.co/220x280?text=Batman"
-                    alt="Batman movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Batman" alt="Batman poster">
                 <h3>The Batman</h3>
-
                 <p>Action | Thriller</p>
-
                 <p>⭐ 7.8/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="batman">Book Now</button>
             </div>
-
-
-            <!-- MOVIE 4 -->
 
             <div class="movie-card" data-genre="Sci-Fi Adventure">
-
-                <img
-                    src="https://placehold.co/220x280?text=Dune"
-                    alt="Dune movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Dune" alt="Dune poster">
                 <h3>Dune</h3>
-
                 <p>Sci-Fi | Adventure</p>
-
                 <p>⭐ 8.5/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="dune">Book Now</button>
             </div>
-
-
-            <!-- MOVIE 5 -->
 
             <div class="movie-card" data-genre="Drama Thriller">
-
-                <img
-                    src="https://placehold.co/220x280?text=Joker"
-                    alt="Joker movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Joker" alt="Joker poster">
                 <h3>Joker</h3>
-
                 <p>Drama | Thriller</p>
-
                 <p>⭐ 8.1/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="joker">Book Now</button>
             </div>
-
-
-            <!-- MOVIE 6 -->
 
             <div class="movie-card" data-genre="Sci-Fi Thriller">
-
-                <img
-                    src="https://placehold.co/220x280?text=Inception"
-                    alt="Inception movie poster"
-                >
-
+                <img src="https://placehold.co/220x280?text=Inception" alt="Inception poster">
                 <h3>Inception</h3>
-
                 <p>Sci-Fi | Thriller</p>
-
                 <p>⭐ 8.8/10</p>
-
-                <button>Book Now</button>
-
+                <button class="book-btn" data-movie-id="inception">Book Now</button>
             </div>
 
-
         </div>
-
     </section>
 
+    <!-- Booking Modal -->
+    <div class="booking-modal" id="bookingModal">
+        <div class="booking-content">
 
-    <!-- =========================
-         FOOTER
-    ========================== -->
+            <h2>Book Your Tickets</h2>
+
+            <p id="selectedMovie">Movie</p>
+
+            <label for="ticketQuantity">Number of tickets:</label>
+
+            <input
+                type="number"
+                id="ticketQuantity"
+                min="1"
+                max="10"
+                value="1"
+            >
+
+            <h3 id="totalPrice">Total: €12.00</h3>
+
+            <button id="payNowBtn">Proceed to Payment</button>
+
+            <button id="closeModalBtn">Cancel</button>
+
+            <p id="bookingMessage" role="alert"></p>
+
+        </div>
+    </div>
 
     <footer>
-
         <h3>CineBook</h3>
-
-        <p>
-            Your movie experience starts here.
-        </p>
-
-        <p>
-            © 2026 CineBook. All rights reserved.
-        </p>
-
+        <p>Your movie experience starts here.</p>
+        <p>© 2026 CineBook. All rights reserved.</p>
     </footer>
 
-
-    <!-- Connect JavaScript -->
     <script src="script.js"></script>
 
 </body>
-
 </html>
