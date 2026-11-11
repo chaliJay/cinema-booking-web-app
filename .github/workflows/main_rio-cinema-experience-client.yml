@@ -1,0 +1,68 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - rio-cinema-experience-client
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'client/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read 
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: |
+          npm install
+          npm run build
+         
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: ./client/dist
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: build
+    permissions:
+      id-token: write 
+      contents: read 
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9F0567291DD648558E9BA986D4FD4334 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2D624F03853C4D2082152C5A7891A740 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E74229D246E14AF899F2AD0875682E30 }}
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'rio-cinema-experience-client'
+          slot-name: 'Production'
+          package: .
+          
