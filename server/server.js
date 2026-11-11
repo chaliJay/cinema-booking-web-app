@@ -24,7 +24,7 @@ const pool = new Pool({
     database: process.env.DB_NAME
 });
 
-// Allowed frontend addresses
+// Allowed frontend addresse
 const allowedOrigins = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
