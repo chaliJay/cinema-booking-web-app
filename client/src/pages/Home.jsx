@@ -8,7 +8,7 @@ export default function Home() {
 
       {/* Main section */}
       <section className="hero">
-        <h1>Welcome to CineBook</h1>
+        <h1>Welcome to Rio Cinema</h1>
 
         <p>Book your favourite movies and enjoy the cinema experience.</p>
 
@@ -45,7 +45,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer>
-        <p>© 2026 CineBook. All rights reserved.</p>
+        <p>© 2026 Rio Cinema. All rights reserved.</p>
       </footer>
     </>
   );

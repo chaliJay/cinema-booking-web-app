@@ -42,7 +42,7 @@ export default function Success() {
     <section style={{ textAlign: "center", padding: "80px 20px" }}>
       <h1 style={{ color: "green" }}>✓ Payment Successful!</h1>
 
-      <h2>Thank you for booking with CineBook!</h2>
+      <h2>Thank you for booking with Rio Cinema!</h2>
 
       <p id="paymentStatus">{status}</p>
 

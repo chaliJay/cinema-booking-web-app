@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function Header({ aboutHref = "#", contactHref = "#" }) {
   return (
     <header>
-      <h2>CineBook</h2>
+      <h2>Rio Cinema</h2>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/movies">Movies</Link>

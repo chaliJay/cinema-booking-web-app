@@ -224,9 +224,9 @@ export default function Movies() {
       </div>
 
       <footer>
-        <h3>CineBook</h3>
+        <h3>Rio Cinema</h3>
         <p>Your movie experience starts here.</p>
-        <p>© 2026 CineBook. All rights reserved.</p>
+        <p>© 2026 Rio Cinema. All rights reserved.</p>
       </footer>
     </>
   );
