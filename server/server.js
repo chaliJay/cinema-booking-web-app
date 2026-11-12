@@ -36,18 +36,18 @@ app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 // Movie catalogue (prices in EUR cents)
-const movies = {
+/*const movies = {
     avatar: { name: "Avatar", price: 1200 },
     interstellar: { name: "Interstellar", price: 1200 },
     batman: { name: "The Batman", price: 1200 },
     dune: { name: "Dune", price: 1200 },
     joker: { name: "Joker", price: 1200 },
     inception: { name: "Inception", price: 1200 }
-};
+};*/
 
 // Test server
 app.get("/", (req, res) => {
-    res.send("CineBook Payment Server is running!");
+    res.send("Rio Cinema Payment Server is running!");
 });
 
 
@@ -188,17 +188,54 @@ app.get("/api/cities", async (req, res) => {
     }
 });
 
+// Get movies from PostgreSQL
+app.get("/api/movies", async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT * FROM movies ORDER BY id"
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+// Get movies from PostgreSQL
+app.get("/api/movies/:id", async (req, res) => {
+    try {
+        const movieId = req.params.id;
+
+        const result = await pool.query(
+            "SELECT * FROM movies WHERE id = $1", [movieId]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+
 // Create Stripe Checkout Session
 app.post("/api/create-checkout-session", async (req, res) => {
     try {
         const { movieId, quantity } = req.body;
-        const movie = movies[movieId];
 
-        if (!movie) {
+        const response = await fetch(
+            `http://localhost:5000/api/movies/${movieId}`
+        );
+
+        if (!response.ok) {
             return res.status(400).json({
                 error: "Invalid movie selected"
             });
         }
+
+        const movie = await response.json();
+
 
         if (
             !Number.isInteger(quantity) ||
@@ -226,7 +263,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
                         product_data: {
                             name: movie.name + " - Cinema Ticket"
                         },
-                        unit_amount: movie.price
+                        unit_amount: 1200 // todo : need to get real price
                     },
                     quantity: quantity
                 }
@@ -245,6 +282,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         });
     }
 });
+
 
 // Verify Stripe payment
 app.get("/api/verify-session", async (req, res) => {
@@ -286,5 +324,7 @@ app.get("/api/verify-session", async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`CineBook server running on port ${PORT}`);
+    console.log(`Rio Cinema server running on port ${PORT}`);
 });
+
+

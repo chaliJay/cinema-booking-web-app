@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 import "./booking.css";
 
-const movies = [
+/*const movies = [
   { id: "avatar", title: "Avatar", genre: "Action Adventure", label: "Action | Adventure", rating: "7.9", img: "Avatar", alt: "Avatar poster" },
   { id: "interstellar", title: "Interstellar", genre: "Sci-Fi Drama", label: "Sci-Fi | Drama", rating: "8.7", img: "Interstellar", alt: "Interstellar poster" },
   { id: "batman", title: "The Batman", genre: "Action Thriller", label: "Action | Thriller", rating: "7.8", img: "Batman", alt: "Batman poster" },
@@ -10,13 +10,33 @@ const movies = [
   { id: "joker", title: "Joker", genre: "Drama Thriller", label: "Drama | Thriller", rating: "8.1", img: "Joker", alt: "Joker poster" },
   { id: "inception", title: "Inception", genre: "Sci-Fi Thriller", label: "Sci-Fi | Thriller", rating: "8.8", img: "Inception", alt: "Inception poster" },
 ];
-
+*/
 const ticketPrice = 12;
 
 export default function Movies() {
   // ---------- Search and genre filter ----------
   const [searchValue, setSearchValue] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
+  const [movies, setMovies] = useState([]);
+
+  useEffect(()=> {
+    const fetchMovies = async () => {
+        try{
+      const response = await fetch("http://localhost:5000/api/movies");
+
+      const data = await response.json();
+      
+      setMovies(data);
+
+    }
+    catch(error){
+      console.error("Movie fetching error", error);
+    }
+  };
+
+  fetchMovies();
+
+  },[]);
 
   function isVisible(movie) {
     const matchesSearch = movie.title
@@ -175,8 +195,9 @@ export default function Movies() {
                 alt={movie.alt}
               />
               <h3>{movie.title}</h3>
+              <h3>{movie.id}</h3>
               <p>{movie.label}</p>
-              <p>⭐ {movie.rating}/10</p>
+              <p>⭐ {movie.age_raating}/10</p>
               <button
                 className="book-btn"
                 data-movie-id={movie.id}
