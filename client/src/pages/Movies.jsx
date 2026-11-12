@@ -180,7 +180,7 @@ export default function Movies() {
       </section>
 
       <section className="movies">
-        <h2>Now Showing</h2>
+        <h2>Upcoming Movies</h2>
 
         <div className="movie-container">
           {movies.map((movie) => (
@@ -191,7 +191,7 @@ export default function Movies() {
               style={{ display: isVisible(movie) ? "block" : "none" }}
             >
               <img
-                src={`https://placehold.co/220x280?text=${movie.img}`}
+                src={movie.poster_url}
                 alt={movie.alt}
               />
               <h3>{movie.title}</h3>
