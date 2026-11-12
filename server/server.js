@@ -114,8 +114,8 @@ app.post("/api/shows/:id/book", async (req, res) => {
 
     if (!Number.isInteger(showId)) return res.status(400).json({ error: "Invalid show id" });
     if (typeof email !== "string" || !EMAIL_RE.test(email)) return res.status(400).json({ error: "Enter a valid email" });
-    if (!Array.isArray(seats) || seats.length < 1 || seats.length > 10 || !seats.every(Number.isInteger)) {
-        return res.status(400).json({ error: "Choose between 1 and 10 seats" });
+    if (!Array.isArray(seats) || seats.length < 1 || seats.length > 6 || !seats.every(Number.isInteger)) {
+        return res.status(400).json({ error: "Only 6 seat can be reserved by one user!" });
     }
     if (new Set(seats).size !== seats.length) return res.status(400).json({ error: "Duplicate seats" });
     if (seats.includes(0)) return res.status(400).json({ error: "Seat 1 is reserved for the owner" });
@@ -232,10 +232,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 }
             ],
             mode: "payment",
-            success_url:
-                `${origin}/cinema-booking-web-app/client/success.html?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url:
-                `${origin}/cinema-booking-web-app/client/cancel.html`
+            success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url:  `${origin}/cancel`,    
         });
 
         res.json({ url: session.url });

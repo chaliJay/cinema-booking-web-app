@@ -1,19 +1,17 @@
-import { useState } from 'react'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import Movies from "./pages/Movies.jsx";
+import Success from "./pages/Success.jsx";
+import Cancel from "./pages/Cancel.jsx";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <h1>Hello World</h1>
-        <h3>This is Team M</h3>
-        <h3>Team Members : Chalith, Faisal, Jagrith</h3>
-      <h4>Hello</h4>
-      </div>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/movies" element={<Movies />} />
+      <Route path="/success" element={<Success />} />
+      <Route path="/cancel" element={<Cancel />} />
+    </Routes>
+  );
 }
-
-export default App

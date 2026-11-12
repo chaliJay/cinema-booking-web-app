@@ -1,0 +1,55 @@
+.booking-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.booking-content {
+    background: white;
+    color: #222;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.booking-content h2 {
+    margin-top: 0;
+}
+
+.booking-content input {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    box-sizing: border-box;
+}
+
+.booking-content button {
+    padding: 12px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+}
+
+#payNowBtn {
+    background: #176b45;
+    color: white;
+}
+
+#closeModalBtn {
+    background: #ddd;
+    color: #222;
+}
+
+#bookingMessage {
+    margin-top: 12px;
+    color: #c0392b;
+}
