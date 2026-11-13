@@ -8,6 +8,10 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const API_URL = "https://cinema-booking-web-app-git-server-rio-cinema-experience.2.rahtiapp.fi/";
+//const API_URL = "https://rio-cinema-experience-hkczcmaghrd6hne9.denmarkeast-01.azurewebsites.net";
+//const API_URL ="http://localhost:5000";
+
 // Stripe setup
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error("STRIPE_SECRET_KEY is missing from .env");
@@ -225,7 +229,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         const { movieId, quantity } = req.body;
 
         const response = await fetch(
-            `http://localhost:5000/api/movies/${movieId}`
+            `${API_URL}/api/movies/${movieId}`
         );
 
         if (!response.ok) {
