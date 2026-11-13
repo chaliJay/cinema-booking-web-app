@@ -12,6 +12,8 @@ import "./booking.css";
 ];
 */
 const ticketPrice = 12;
+const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+ //const API_URL ="http://localhost:5000";
 
 export default function Movies() {
   // ---------- Search and genre filter ----------
@@ -22,7 +24,7 @@ export default function Movies() {
   useEffect(()=> {
     const fetchMovies = async () => {
         try{
-      const response = await fetch("http://localhost:5000/api/movies");
+      const response = await fetch(`${API_URL}/api/movies`);
 
       const data = await response.json();
       
@@ -107,7 +109,7 @@ export default function Movies() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/create-checkout-session",
+        `${API_URL}/api/create-checkout-session`,
         {
           method: "POST",
 

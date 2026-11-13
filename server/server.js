@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const API_URL = "https://cinema-booking-web-app-git-server-rio-cinema-experience.2.rahtiapp.fi/";
+const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
 //const API_URL = "https://rio-cinema-experience-hkczcmaghrd6hne9.denmarkeast-01.azurewebsites.net";
 //const API_URL ="http://localhost:5000";
 

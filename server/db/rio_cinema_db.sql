@@ -143,3 +143,61 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO rio_admin;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO rio_admin;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO rio_admin;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO rio_admin;
+
+
+---- Insert queries
+-- 1. Cities
+INSERT INTO cities (name)
+SELECT v.name FROM (VALUES ('Oulu'), ('Tampere')) AS v(name)
+WHERE NOT EXISTS (SELECT 1 FROM cities c WHERE c.name = v.name);
+
+-- 2. Theaters (one per city)
+INSERT INTO theaters (city_id, name, lat, lng)
+SELECT c.id, v.name, v.lat, v.lng
+FROM (VALUES ('Oulu',    'Rio Cinema Oulu',    65.0121, 25.4651),
+             ('Tampere', 'Rio Cinema Tampere', 61.4978, 23.7610)) AS v(city, name, lat, lng)
+JOIN cities c ON c.name = v.city
+WHERE NOT EXISTS (SELECT 1 FROM theaters t WHERE t.city_id = c.id);
+
+-- 3. Rooms: 100 seats and 200 seats in each theater (4 rooms in total)
+INSERT INTO rooms (theater_id, name, capacity)
+SELECT t.id, v.name, v.capacity
+FROM theaters t
+CROSS JOIN (VALUES ('Room 1', 100), ('Room 2', 200)) AS v(name, capacity)
+WHERE t.name IN ('Rio Cinema Oulu', 'Rio Cinema Tampere')
+  AND NOT EXISTS (SELECT 1 FROM rooms x WHERE x.theater_id = t.id);
+
+-- 4. Seats: snake order, no seat/row 13, seat 1 = owner, wheelchair places in row 1
+INSERT INTO seats (room_id, row_no, row_label, seat_label, is_owner_seat, is_wheelchair)
+SELECT r.id,
+       i / 10 + 1,
+       (CASE WHEN i / 10 + 1 >= 13 THEN i / 10 + 2 ELSE i / 10 + 1 END)::text,
+       (CASE WHEN i + 1 >= 13 THEN i + 2 ELSE i + 1 END)::text,
+       (i = 0),
+       (i / 10 = 0 AND i BETWEEN 1 AND (CASE WHEN r.capacity = 100 THEN 2 ELSE 3 END))
+FROM rooms r
+CROSS JOIN LATERAL generate_series(0, r.capacity - 1) AS i
+WHERE NOT EXISTS (SELECT 1 FROM seats s WHERE s.room_id = r.id);
+
+-- 5. Movies
+INSERT INTO movies (title, poster_url, trailer_url, age_rating, runtime_min)
+SELECT v.title, v.poster, '', v.age, v.mins
+FROM (VALUES
+  ('Angry Bird',  'https://a3s.fi/swift/v1/rio_cinema/angry_bird.jpg', 'K12', 118),
+  ('Dooms Days',  'https://a3s.fi/swift/v1/rio_cinema/doomsday.jpg',   'K7',  104),
+  ('Red Curtain', 'https://a3s.fi/swift/v1/rio_cinema/gollum.jpg',     'K16', 131)
+) AS v(title, poster, age, mins)
+WHERE NOT EXISTS (SELECT 1 FROM movies m WHERE m.title = v.title);
+
+-- 6. Shows: today + next 2 days, 16:30 and 19:30, every demo movie in every room
+INSERT INTO shows (movie_id, room_id, start_at, base_price)
+SELECT m.id, r.id, current_date + d * interval '1 day' + x.t::time,
+       CASE WHEN r.capacity = 200 THEN 13.50 ELSE 12.00 END
+FROM movies m
+CROSS JOIN rooms r
+CROSS JOIN generate_series(0, 2) AS d
+CROSS JOIN (VALUES ('16:30'), ('19:30')) AS x(t)
+WHERE m.title IN ('Angry Bird', 'Dooms Days', 'Red Curtain')
+  AND NOT EXISTS (SELECT 1 FROM shows s
+                  WHERE s.room_id = r.id AND s.movie_id = m.id
+                    AND s.start_at = current_date + d * interval '1 day' + x.t::time);
