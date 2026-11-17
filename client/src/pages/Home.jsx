@@ -1,6 +1,10 @@
 import Header from "./Header.jsx";
+import {useNavigate} from "react-router-dom";
 
 export default function Home() {
+
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Navigation bar */}
@@ -24,7 +28,7 @@ export default function Home() {
             <img src="/doomsday.jpg" alt="Movie 1" />
             <h3>Movie One</h3>
             <p>Action | Adventure</p>
-            <button>Book Now</button>
+            <button onClick={() => navigate('/seats')}>Book Now</button>
           </div>
 
           <div className="movie-card">

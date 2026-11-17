@@ -2,15 +2,6 @@ import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 import "./booking.css";
 
-/*const movies = [
-  { id: "avatar", title: "Avatar", genre: "Action Adventure", label: "Action | Adventure", rating: "7.9", img: "Avatar", alt: "Avatar poster" },
-  { id: "interstellar", title: "Interstellar", genre: "Sci-Fi Drama", label: "Sci-Fi | Drama", rating: "8.7", img: "Interstellar", alt: "Interstellar poster" },
-  { id: "batman", title: "The Batman", genre: "Action Thriller", label: "Action | Thriller", rating: "7.8", img: "Batman", alt: "Batman poster" },
-  { id: "dune", title: "Dune", genre: "Sci-Fi Adventure", label: "Sci-Fi | Adventure", rating: "8.5", img: "Dune", alt: "Dune poster" },
-  { id: "joker", title: "Joker", genre: "Drama Thriller", label: "Drama | Thriller", rating: "8.1", img: "Joker", alt: "Joker poster" },
-  { id: "inception", title: "Inception", genre: "Sci-Fi Thriller", label: "Sci-Fi | Thriller", rating: "8.8", img: "Inception", alt: "Inception poster" },
-];
-*/
 const ticketPrice = 12;
 const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
  //const API_URL ="http://localhost:5000";
@@ -82,11 +73,11 @@ export default function Movies() {
   function getTotalPriceText() {
     const quantity = Number(ticketQuantity);
 
-    if (quantity >= 1 && quantity <= 10) {
+    if (quantity >= 1 && quantity <= 6) {
       const total = quantity * ticketPrice;
       return `Total: €${total.toFixed(2)}`;
     } else {
-      return "Select 1 to 10 tickets";
+      return "Select 1 to 6 tickets";
     }
   }
 
@@ -99,8 +90,8 @@ export default function Movies() {
       return;
     }
 
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-      setBookingMessage("Please select between 1 and 10 tickets.");
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 6) {
+      setBookingMessage("Please select between 1 and 6 tickets.");
       return;
     }
 
@@ -254,3 +245,5 @@ export default function Movies() {
     </>
   );
 }
+
+
