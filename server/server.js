@@ -8,9 +8,9 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
 //const API_URL = "https://rio-cinema-experience-hkczcmaghrd6hne9.denmarkeast-01.azurewebsites.net";
-//const API_URL ="http://localhost:5000";
+const API_URL ="http://localhost:5000";
 
 // Stripe setup
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -324,6 +324,204 @@ app.get("/api/verify-session", async (req, res) => {
         console.error("Verification error:", error.message);
         res.status(500).json({
             error: "Unable to verify payment"
+        });
+    }
+});
+
+// =====================================
+// AUTHENTICATION SYSTEM
+// =====================================
+
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+// Signup
+app.post("/api/auth/signup", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                error: "All fields are required."
+            });
+        }
+
+        if (name.trim().length > 100) {
+            return res.status(400).json({
+                error: "Name must be less than 100 characters."
+            });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({
+                error: "Enter a valid email address."
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                error: "Password must be at least 8 characters."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if email already exists
+        const existingUser = await pool.query(
+            "SELECT id FROM users WHERE email = $1",
+            [normalizedEmail]
+        );
+
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({
+                error: "An account with this email already exists."
+            });
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        // Save user
+        const result = await pool.query(
+            `INSERT INTO users (name, email, password_hash)
+             VALUES ($1, $2, $3)
+             RETURNING id, name, email, role`,
+            [name.trim(), normalizedEmail, passwordHash]
+        );
+
+        const user = result.rows[0];
+
+        // Create JWT
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        res.status(201).json({
+            message: "Account created successfully!",
+            token,
+            user
+        });
+
+    } catch (error) {
+        console.error("Signup error:", error);
+
+        res.status(500).json({
+            error: "Unable to create account."
+        });
+    }
+});
+
+
+// Login
+app.post("/api/auth/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                error: "Email and password are required."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const result = await pool.query(
+            "SELECT * FROM users WHERE email = $1",
+            [normalizedEmail]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({
+                error: "Invalid email or password."
+            });
+        }
+
+        const user = result.rows[0];
+
+        const passwordMatch = await bcrypt.compare(
+            password,
+            user.password_hash
+        );
+
+        if (!passwordMatch) {
+            return res.status(401).json({
+                error: "Invalid email or password."
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        res.json({
+            message: "Login successful!",
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error("Login error:", error);
+
+        res.status(500).json({
+            error: "Unable to login."
+        });
+    }
+});
+
+
+// Verify logged-in user
+app.get("/api/auth/me", async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({
+                error: "Not authenticated."
+            });
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        const result = await pool.query(
+            `SELECT id, name, email, role
+             FROM users
+             WHERE id = $1`,
+            [decoded.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({
+                error: "User not found."
+            });
+        }
+
+        res.json({ user: result.rows[0] });
+
+    } catch (error) {
+        res.status(401).json({
+            error: "Invalid or expired token."
         });
     }
 });

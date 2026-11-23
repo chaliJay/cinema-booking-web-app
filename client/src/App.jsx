@@ -1,10 +1,14 @@
+
 import { Routes, Route } from "react-router-dom";
+
 import Home from "./pages/Home.jsx";
 import Movies from "./pages/Movies.jsx";
 import SeatReservation from "./seat/SeatReservation.jsx";
 import Success from "./pages/Success.jsx";
 import Cancel from "./pages/Cancel.jsx";
-
+import Account from "./pages/Account.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 
 export default function App() {
   return (
@@ -15,7 +19,10 @@ export default function App() {
       <Route path="/seats" element={<SeatReservation />} />
       <Route path="/success" element={<Success />} />
       <Route path="/cancel" element={<Cancel />} />
-      
+      <Route path="/account" element={<Account />} />
+
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
     </Routes>
   );
 }
