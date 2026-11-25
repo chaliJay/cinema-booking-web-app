@@ -3,8 +3,9 @@ import Header from "./Header.jsx";
 import "./booking.css";
 
 const ticketPrice = 12;
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
- const API_URL ="http://localhost:5000";
+
+const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+//const API_URL ="http://localhost:5000";
 
 export default function Movies() {
   // ---------- Search and genre filter ----------

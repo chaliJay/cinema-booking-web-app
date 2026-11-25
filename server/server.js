@@ -8,9 +8,8 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-//const API_URL = "https://rio-cinema-experience-hkczcmaghrd6hne9.denmarkeast-01.azurewebsites.net";
-const API_URL ="http://localhost:5000";
+const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+//const API_URL ="http://localhost:5000";
 
 // Stripe setup
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -41,16 +40,6 @@ const allowedOrigins = [
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
-// Movie catalogue (prices in EUR cents)
-/*const movies = {
-    avatar: { name: "Avatar", price: 1200 },
-    interstellar: { name: "Interstellar", price: 1200 },
-    batman: { name: "The Batman", price: 1200 },
-    dune: { name: "Dune", price: 1200 },
-    joker: { name: "Joker", price: 1200 },
-    inception: { name: "Inception", price: 1200 }
-};*/
-
 // Test server
 app.get("/", (req, res) => {
     res.send("Rio Cinema Payment Server is running!");
@@ -59,126 +48,6 @@ app.get("/", (req, res) => {
 
 const CINEMA_TZ = process.env.CINEMA_TZ || "Europe/Helsinki";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// The seat page sends seat numbers 0..total-1 (0 = seat 1, the owner seat).
-// The seats table stores labels that skip 13, so convert between the two.
-const indexToLabel = (i) => String(i + 1 >= 13 ? i + 2 : i + 1);
-const labelToIndex = (label) => (Number(label) >= 14 ? Number(label) - 2 : Number(label) - 1);
-
-// GET seats of one show -> { show, room, taken: [indexes] }
-app.get("/api/shows/:id/seats", async (req, res) => {
-    try {
-        const showId = Number(req.params.id);
-        if (!Number.isInteger(showId)) {
-            return res.status(400).json({ error: "Invalid show id" });
-        }
-
-        const showResult = await pool.query(
-            `SELECT s.id, s.base_price,
-                    to_char(s.start_at, 'Dy DD Mon HH24:MI') AS time,
-                    m.title, r.id AS room_id, r.name AS room_name,
-                    r.capacity, t.name AS theater
-             FROM shows s
-             JOIN movies m   ON m.id = s.movie_id
-             JOIN rooms r    ON r.id = s.room_id
-             JOIN theaters t ON t.id = r.theater_id
-             WHERE s.id = $1`,
-            [showId]
-        );
-        if (showResult.rows.length === 0) {
-            return res.status(404).json({ error: "Show not found" });
-        }
-        const show = showResult.rows[0];
-
-        const ticketResult = await pool.query(
-            `SELECT st.seat_label
-             FROM tickets tk
-             JOIN bookings b ON b.id = tk.booking_id AND b.status <> 'cancelled'
-             JOIN seats st   ON st.id = tk.seat_id
-             WHERE tk.show_id = $1`,
-            [showId]
-        );
-
-        // index 0 = owner seat, always taken
-        const taken = new Set([0, ...ticketResult.rows.map((r) => labelToIndex(r.seat_label))]);
-
-        res.json({
-            show: { id: show.id, title: `${show.title} · ${show.time}`, price: show.base_price },
-            room: { id: show.room_id, theater: show.theater, name: show.room_name, total: show.capacity },
-            taken: [...taken].sort((a, b) => a - b)
-        });
-    } catch (err) {
-        console.error("Seats error:", err);
-        res.status(500).json({ error: "Database error" });
-    }
-});
-
-// Book seats -> 201, or 409 when a seat is already taken
-app.post("/api/shows/:id/book", async (req, res) => {
-    const showId = Number(req.params.id);
-    const { seats, email } = req.body || {};
-
-    if (!Number.isInteger(showId)) return res.status(400).json({ error: "Invalid show id" });
-    if (typeof email !== "string" || !EMAIL_RE.test(email)) return res.status(400).json({ error: "Enter a valid email" });
-    if (!Array.isArray(seats) || seats.length < 1 || seats.length > 6 || !seats.every(Number.isInteger)) {
-        return res.status(400).json({ error: "Only 6 seat can be reserved by one user!" });
-    }
-    if (new Set(seats).size !== seats.length) return res.status(400).json({ error: "Duplicate seats" });
-    if (seats.includes(0)) return res.status(400).json({ error: "Seat 1 is reserved for the owner" });
-
-    const db = await pool.connect();
-    try {
-        const showResult = await db.query(
-            `SELECT s.room_id, s.base_price, r.capacity
-             FROM shows s JOIN rooms r ON r.id = s.room_id
-             WHERE s.id = $1 AND s.status = 'scheduled'
-               AND s.start_at > (now() AT TIME ZONE $2)`,
-            [showId, CINEMA_TZ]
-        );
-        if (showResult.rows.length === 0) {
-            return res.status(404).json({ error: "Show not found or already started" });
-        }
-        const { room_id, base_price, capacity } = showResult.rows[0];
-
-        // match the chosen numbers to rows of the seats table (owner seat never matches)
-        const seatResult = await db.query(
-            `SELECT id FROM seats
-             WHERE room_id = $1 AND seat_label = ANY($2::text[]) AND is_owner_seat = false`,
-            [room_id, seats.map(indexToLabel)]
-        );
-        if (seats.some((n) => n < 0 || n >= capacity) || seatResult.rowCount !== seats.length) {
-            return res.status(400).json({ error: "Seat does not exist in this room" });
-        }
-
-        // booking + tickets saved together; UNIQUE (show_id, seat_id) stops double booking
-        await db.query("BEGIN");
-        try {
-            const booking = await db.query(
-                `INSERT INTO bookings (show_id, guest_email, status, total_price)
-                 VALUES ($1, $2, 'confirmed', $3) RETURNING id`,
-                [showId, email.toLowerCase(), (base_price * seats.length).toFixed(2)]
-            );
-            await db.query(
-                `INSERT INTO tickets (booking_id, show_id, seat_id, ticket_type, price)
-                 SELECT $1, $2, unnest($3::int[]), 'adult', $4`,
-                [booking.rows[0].id, showId, seatResult.rows.map((r) => r.id), base_price]
-            );
-            await db.query("COMMIT");
-            res.status(201).json({ ok: true, booking_id: booking.rows[0].id, seats });
-        } catch (err) {
-            await db.query("ROLLBACK");
-            if (err.code === "23505") {
-                return res.status(409).json({ error: "Someone just took one of these seats. Pick again." });
-            }
-            throw err;
-        }
-    } catch (err) {
-        console.error("Booking error:", err);
-        res.status(500).json({ error: "Unable to book seats" });
-    } finally {
-        db.release();
-    }
-});
 
 // Get cities from PostgreSQL
 app.get("/api/cities", async (req, res) => {
@@ -523,6 +392,203 @@ app.get("/api/auth/me", async (req, res) => {
         res.status(401).json({
             error: "Invalid or expired token."
         });
+    }
+});
+
+// theaters + upcoming shows for one movie
+app.get("/api/movies/:movieId/shows", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+        `SELECT sh.id        AS show_id,
+                sh.base_price,
+                to_char(sh.start_at, 'HH24:MI')   AS time,
+                to_char(sh.start_at, 'Dy DD Mon') AS day,
+                th.id   AS theater_id,
+                th.name AS theater_name
+            FROM shows sh
+            JOIN rooms r     ON r.id  = sh.room_id
+            JOIN theaters th ON th.id = r.theater_id
+            WHERE sh.movie_id = $1
+            AND sh.status = 'scheduled'
+            AND sh.start_at > now()
+            AND r.capacity = 100          -- remove this line when the 200 hall is ready
+            ORDER BY th.name, sh.start_at`,
+        [req.params.movieId]
+    );
+
+    // group the rows by theater
+    const theaters = [];
+    for (const row of rows) {
+      let t = theaters.find((x) => x.id === row.theater_id);
+      if (!t) {
+        t = { id: row.theater_id, name: row.theater_name, shows: [] };
+        theaters.push(t);
+      }
+      t.shows.push({
+        id: row.show_id,
+        day: row.day,
+        time: row.time,
+        price: Number(row.base_price),
+      });
+    }
+
+    res.json(theaters);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not load shows" });
+  }
+});
+
+// seats only an admin can book
+app.get("/api/shows/:showId/restricted-seats", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT s.row_label, s.seat_label
+         FROM shows sh
+         JOIN seats s ON s.room_id = sh.room_id
+        WHERE sh.id = $1 AND s.is_owner_seat = true`,
+      [req.params.showId]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ---------- helper: logged-in user (or null) ----------
+async function getUserFromRequest(req) {
+    try {
+        const header = req.headers.authorization;
+        if (!header || !header.startsWith("Bearer ")) return null;
+
+        const decoded = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
+        const result = await pool.query(
+            "SELECT id, email, role FROM users WHERE id = $1",
+            [decoded.id]
+        );
+        return result.rows[0] || null;
+    } catch {
+        return null; // no token or invalid token = guest
+    }
+}
+
+// Booked seats of one show -> [{ row_label, seat_label }]
+app.get("/api/shows/:showId/booked-seats", async (req, res) => {
+    try {
+        const showId = Number(req.params.showId);
+        if (!Number.isInteger(showId)) {
+            return res.status(400).json({ error: "Invalid show id" });
+        }
+
+        const { rows } = await pool.query(
+            `SELECT s.row_label, s.seat_label
+             FROM tickets t
+             JOIN seats s    ON s.id = t.seat_id
+             JOIN bookings b ON b.id = t.booking_id
+             WHERE t.show_id = $1 AND b.status <> 'cancelled'`,
+            [showId]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error("Booked seats error:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+// Save a booking: body { showId, seats: [{ row, number }], email? }
+app.post("/api/bookings", async (req, res) => {
+    const { showId, seats, email } = req.body || {};
+
+    if (!Number.isInteger(showId)) {
+        return res.status(400).json({ error: "Invalid show id" });
+    }
+    if (!Array.isArray(seats) || seats.length < 1 || seats.length > 6) {
+        return res.status(400).json({ error: "Select 1 to 6 seats" });
+    }
+    if (!seats.every((s) => s && s.row !== undefined && s.number !== undefined)) {
+        return res.status(400).json({ error: "Invalid seat data" });
+    }
+
+    const keys = seats.map((s) => `${s.row}-${s.number}`);
+    if (new Set(keys).size !== keys.length) {
+        return res.status(400).json({ error: "Duplicate seats" });
+    }
+
+    const user = await getUserFromRequest(req);
+    const isAdmin = user?.role === "admin";
+
+    // booking needs a user or an email (CHECK in the bookings table)
+    const guestEmail =
+        typeof email === "string" && EMAIL_RE.test(email)
+            ? email.trim().toLowerCase()
+            : "guest@example.com"; // temporary until the frontend sends an email
+
+    const db = await pool.connect();
+    try {
+        // the show must exist, be scheduled and not started yet
+        const showResult = await db.query(
+            `SELECT room_id, base_price
+             FROM shows
+             WHERE id = $1 AND status = 'scheduled'
+               AND start_at > (now() AT TIME ZONE $2)`,
+            [showId, CINEMA_TZ]
+        );
+        if (showResult.rows.length === 0) {
+            return res.status(404).json({ error: "Show not found or already started" });
+        }
+        const { room_id, base_price } = showResult.rows[0];
+
+        // find each seat in this room
+        const seatIds = [];
+        for (const s of seats) {
+            const found = await db.query(
+                `SELECT id, is_owner_seat
+                 FROM seats
+                 WHERE room_id = $1 AND row_label = $2 AND seat_label = $3`,
+                [room_id, String(s.row), String(s.number)]
+            );
+            if (found.rowCount === 0) {
+                return res.status(400).json({ error: "Seat does not exist in this room" });
+            }
+            if (found.rows[0].is_owner_seat && !isAdmin) {
+                return res.status(403).json({ error: "This seat can only be booked by an admin" });
+            }
+            seatIds.push(found.rows[0].id);
+        }
+
+        const total = Number(base_price) * seatIds.length;
+
+        // booking + tickets together; UNIQUE (show_id, seat_id) stops double booking
+        await db.query("BEGIN");
+        try {
+            const booking = await db.query(
+                `INSERT INTO bookings (show_id, user_id, guest_email, status, total_price)
+                 VALUES ($1, $2, $3, 'confirmed', $4) RETURNING id`,
+                [showId, user ? user.id : null, user ? null : guestEmail, total.toFixed(2)]
+            );
+            const bookingId = booking.rows[0].id;
+
+            await db.query(
+                `INSERT INTO tickets (booking_id, show_id, seat_id, ticket_type, price)
+                 SELECT $1, $2, unnest($3::int[]), 'adult', $4`,
+                [bookingId, showId, seatIds, base_price]
+            );
+
+            await db.query("COMMIT");
+            res.status(201).json({ ok: true, bookingId, total });
+        } catch (err) {
+            await db.query("ROLLBACK");
+            if (err.code === "23505") {
+                return res.status(409).json({ error: "Someone just took one of these seats. Pick again." });
+            }
+            throw err;
+        }
+    } catch (err) {
+        console.error("Booking error:", err);
+        res.status(500).json({ error: "Unable to book seats" });
+    } finally {
+        db.release();
     }
 });
 

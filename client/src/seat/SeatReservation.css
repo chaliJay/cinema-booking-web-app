@@ -107,3 +107,10 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.seat-btn.restricted {
+  background: transparent;
+  border: 1px dashed #666;
+  color: #555;
+  cursor: not-allowed;
+}
