@@ -56,34 +56,6 @@ nav a:hover {
     color: #e63946;
 }
 
-
-/* =================================
-   3. HERO SECTION
-================================= */
-
-.hero {
-    background: linear-gradient(
-        120deg,
-        #171717,
-        #383838
-    );
-
-    color: white;
-    text-align: center;
-    padding: 100px 20px;
-}
-
-.hero h1 {
-    font-size: 45px;
-    margin-bottom: 20px;
-}
-
-.hero p {
-    font-size: 18px;
-    color: #ddd;
-    margin-bottom: 30px;
-}
-
 /* =================================
    5. MOVIES SECTION
 ================================= */

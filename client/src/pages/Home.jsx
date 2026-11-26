@@ -66,6 +66,11 @@ export default function Home() {
         ============================== */}
 
         <section className="hero">
+          <video className="hero-video" autoPlay muted loop playsInline>
+            <source src="/RIO_Cinema.mp4" type="video/mp4" />
+          </video>
+
+          <div className="hero-overlay"></div>
 
           <div className="hero-content">
 
@@ -80,8 +85,7 @@ export default function Home() {
             </h1>
 
             <p>
-              Discover the latest blockbusters, unforgettable stories
-              and an extraordinary cinema experience.
+              Discover the extraordinary cinema experience.
             </p>
 
             <div className="hero-buttons">
