@@ -20,25 +20,25 @@
   padding: 10px 22px;
   background: transparent;
   color: #ccc;
-  border: 1px solid #f84565;
+  border: 1px solid #daa520;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
 }
 
 .show-btn:hover {
-  background: rgba(248, 69, 101, 0.3);
+  background: #c81111;
 }
 
 .show-btn.active {
-  background: #f84565;
+  background: #c81111;
   color: #fff;
 }
 
 .show-continue {
   margin-top: 10px;
   padding: 12px 40px;
-  background: #f84565;
+  background: #c81111;
   color: #fff;
   border: none;
   border-radius: 30px;

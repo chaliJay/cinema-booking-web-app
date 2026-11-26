@@ -84,33 +84,6 @@ nav a:hover {
     margin-bottom: 30px;
 }
 
-
-/* =================================
-   4. BUTTONS
-================================= */
-
-button {
-    background-color: #e63946;
-    color: white;
-
-    border: none;
-    padding: 12px 25px;
-
-    font-size: 15px;
-    font-weight: bold;
-
-    border-radius: 6px;
-    cursor: pointer;
-
-    transition: 0.3s;
-}
-
-button:hover {
-    background-color: #b91c2b;
-    transform: scale(1.05);
-}
-
-
 /* =================================
    5. MOVIES SECTION
 ================================= */
