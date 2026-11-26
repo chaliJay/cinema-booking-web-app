@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 import "./booking.css";
+import { useNavigate } from "react-router-dom";
 
 const ticketPrice = 12;
-const MAX_TICKETS = 6;
 
 // Local development
 const API_URL = "http://localhost:5000";
@@ -13,6 +13,7 @@ const API_URL = "http://localhost:5000";
 // const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
 
 export default function Movies() {
+  const navigate = useNavigate();
   // Movies and filters
   const [movies, setMovies] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -20,14 +21,6 @@ export default function Movies() {
 
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
-
-  // Booking modal
-  const [modalOpen, setModalOpen] = useState(false);
-  const [currentMovieId, setCurrentMovieId] = useState(null);
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [ticketQuantity, setTicketQuantity] = useState(1);
-  const [bookingMessage, setBookingMessage] = useState("");
-  const [paying, setPaying] = useState(false);
 
   // Fetch movies
   useEffect(() => {
@@ -90,107 +83,6 @@ export default function Movies() {
     setSelectedGenre("all");
   }
 
-  // Open booking modal
-  function openModal(movie) {
-    setCurrentMovieId(movie.id);
-    setSelectedMovie(movie);
-    setTicketQuantity(1);
-    setBookingMessage("");
-    setModalOpen(true);
-  }
-
-  // Close booking modal
-  function closeModal() {
-    if (paying) return;
-
-    setModalOpen(false);
-    setBookingMessage("");
-  }
-
-  // Close modal with Escape key
-  useEffect(() => {
-    function handleEscape(event) {
-      if (event.key === "Escape" && modalOpen && !paying) {
-        closeModal();
-      }
-    }
-
-    window.addEventListener("keydown", handleEscape);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscape);
-    };
-  }, [modalOpen, paying]);
-
-  // Ticket quantity
-  const quantity = Number(ticketQuantity);
-  const validQuantity =
-    Number.isInteger(quantity) &&
-    quantity >= 1 &&
-    quantity <= MAX_TICKETS;
-
-  const totalPrice = validQuantity
-    ? quantity * ticketPrice
-    : 0;
-
-  // Stripe payment
-  async function handlePayNow() {
-    if (!currentMovieId) {
-      setBookingMessage("Please select a movie.");
-      return;
-    }
-
-    if (!validQuantity) {
-      setBookingMessage(
-        "Please select between 1 and 6 tickets."
-      );
-      return;
-    }
-
-    setPaying(true);
-    setBookingMessage("");
-
-    try {
-      const response = await fetch(
-        `${API_URL}/api/create-checkout-session`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            movieId: currentMovieId,
-            quantity: quantity,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Payment session failed."
-        );
-      }
-
-      if (!data.url) {
-        throw new Error(
-          "Stripe did not return a checkout URL."
-        );
-      }
-
-      window.location.href = data.url;
-    } catch (error) {
-      console.error("Payment error:", error);
-
-      setBookingMessage(
-        error.message ||
-        "Unable to connect to the payment server."
-      );
-
-      setPaying(false);
-    }
-  }
 
   return (
     <>
@@ -198,32 +90,6 @@ export default function Movies() {
 
       <main className="movies-page">
 
-        {/* HERO SECTION */}
-        {/* <section className="movies-hero">
-          <div className="movies-hero-overlay"></div>
-
-          <div className="movies-hero-content">
-            <span className="movies-eyebrow">
-              THE MAGIC OF CINEMA
-            </span>
-
-            <h1>
-              Discover Your Next
-              <span> Favourite Movie.</span>
-            </h1>
-
-            <p>
-              Great stories deserve the big screen.
-              Explore our movies and make your next
-              movie night unforgettable.
-            </p>
-
-            <a href="#movieCollection" className="hero-explore-btn">
-              EXPLORE MOVIES <span>↓</span>
-            </a>
-          </div>
-        </section>
- */}
         {/* MOVIE COLLECTION */}
         <section className="movie-section" id="movieCollection">
 
@@ -365,7 +231,11 @@ export default function Movies() {
 
                         <button
                           className="poster-book-btn"
-                          onClick={() => openModal(movie)}
+                          onClick={() =>
+                            navigate("/showtimes", {
+                              state: { movie }
+                            })
+                          }
                         >
                           BOOK YOUR TICKETS <span>→</span>
                         </button>
@@ -408,7 +278,11 @@ export default function Movies() {
 
                         <button
                           className="book-btn"
-                          onClick={() => openModal(movie)}
+                          onClick={() =>
+                            navigate("/showtimes", {
+                              state: { movie }
+                            })
+                          }
                         >
                           Book Now <span>→</span>
                         </button>
@@ -458,136 +332,6 @@ export default function Movies() {
         </section>
 
       </main>
-
-      {/* BOOKING MODAL */}
-      {modalOpen && selectedMovie && (
-        <div
-          className="booking-modal"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-              closeModal();
-            }
-          }}
-        >
-          <div className="booking-content">
-
-            <button
-              className="modal-close"
-              onClick={closeModal}
-              disabled={paying}
-              aria-label="Close booking window"
-            >
-              ×
-            </button>
-
-            <span className="modal-eyebrow">
-              RIO CINEMA EXPERIENCE
-            </span>
-
-            <h2>Book Your Tickets</h2>
-
-            <div className="modal-movie">
-              <img
-                src={selectedMovie.poster_url}
-                alt={selectedMovie.title}
-              />
-
-              <div>
-                <h3>{selectedMovie.title}</h3>
-                <p>
-                  {selectedMovie.age_rating || "Movie"}
-                  {selectedMovie.runtime_min
-                    ? ` • ${selectedMovie.runtime_min} min`
-                    : ""}
-                </p>
-              </div>
-            </div>
-
-            <div className="ticket-selection">
-              <div>
-                <label htmlFor="ticketQuantity">
-                  Number of tickets
-                </label>
-                <p>Choose up to 6 tickets</p>
-              </div>
-
-              <div className="quantity-control">
-                <button
-                  type="button"
-                  disabled={quantity <= 1}
-                  onClick={() =>
-                    setTicketQuantity(Math.max(1, quantity - 1))
-                  }
-                >
-                  −
-                </button>
-
-                <span>{ticketQuantity}</span>
-
-                <button
-                  type="button"
-                  disabled={quantity >= MAX_TICKETS}
-                  onClick={() =>
-                    setTicketQuantity(
-                      Math.min(MAX_TICKETS, quantity + 1)
-                    )
-                  }
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="price-summary">
-              <div>
-                <span>Ticket price</span>
-                <strong>€{ticketPrice.toFixed(2)}</strong>
-              </div>
-
-              <div>
-                <span>Quantity</span>
-                <strong>× {ticketQuantity}</strong>
-              </div>
-
-              <div className="total-row">
-                <span>Total amount</span>
-                <strong>
-                  €{totalPrice.toFixed(2)}
-                </strong>
-              </div>
-            </div>
-
-            {bookingMessage && (
-              <p className="booking-message" role="alert">
-                {bookingMessage}
-              </p>
-            )}
-
-            <button
-              className="modal-pay-btn"
-              onClick={handlePayNow}
-              disabled={paying || !validQuantity}
-            >
-              {paying
-                ? "CONNECTING TO STRIPE..."
-                : `PROCEED TO PAYMENT · €${totalPrice.toFixed(2)}`}
-            </button>
-
-            <p className="secure-payment">
-              🔒 Secure checkout powered by Stripe
-            </p>
-
-            <button
-              className="modal-cancel"
-              onClick={closeModal}
-              disabled={paying}
-            >
-              Cancel Booking
-            </button>
-
-          </div>
-        </div>
-      )}
 
       {/* FOOTER */}
       <footer className="movies-footer">

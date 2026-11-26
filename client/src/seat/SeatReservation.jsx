@@ -11,6 +11,7 @@ const ROWS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const SEATS_PER_ROW = 10;
 const SKIP_13 = true;
 const MAX_SEATS = 6;
+const MAX_TICKETS = 6;
 
 function buildSeats() {
   const seats = [];
@@ -193,26 +194,101 @@ export default function SeatReservation() {
         Confirm Booking
       </button>
 
-      {/* Booking modal */}
-      <div
-        className="booking-modal"
-        style={{ display: modalOpen ? "flex" : "none" }}
-      >
-        <div className="booking-content">
-          <h2>Book Your Tickets</h2>
-          <p>{movie?.title}</p>
-          <p>{theater?.name} | {show.day} {show.time}</p>
-          <p>Tickets: {selected.length}</p>
-          <h3>Total: €{total.toFixed(2)}</h3>
+      
+      {/* BOOKING MODAL */}
+      {modalOpen && movie && (
+        <div
+          className="booking-modal"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              closeModal();
+            }
+          }}
+        >
+          <div className="booking-content">
 
-          <button onClick={handlePayNow} disabled={paying}>
-            {paying ? "Connecting to Stripe..." : "Proceed to Payment"}
-          </button>
-          <button onClick={closeModal}>Cancel</button>
+            <button
+              className="modal-close"
+              onClick={closeModal}
+              disabled={paying}
+              aria-label="Close booking window"
+            >
+              ×
+            </button>
 
-          <p role="alert">{message}</p>
+            <span className="modal-eyebrow">
+              RIO CINEMA EXPERIENCE
+            </span>
+
+            <h2>Book Your Tickets</h2>
+
+            <div className="modal-movie">
+              <img
+                src={movie.poster_url}
+                alt={movie.title}
+              />
+
+              <div>
+                <h3>{movie.title}</h3>
+                <p>
+                  {movie.age_rating || "Movie"}
+                  {movie.runtime_min
+                    ? ` • ${movie.runtime_min} min`
+                    : ""}
+                </p>
+              </div>
+            </div>
+
+            <div className="price-summary">
+              <div>
+                <span>Ticket price</span>
+                <strong>€{total.toFixed(2)}</strong>
+              </div>
+
+              <div>
+                <span>Quantity</span>
+                <strong>× {selected.length}</strong>
+              </div>
+
+              <div className="total-row">
+                <span>Total amount</span>
+                <strong>
+                  €{total.toFixed(2)}
+                </strong>
+              </div>
+            </div>
+
+            {message && (
+              <p className="booking-message" role="alert">
+                {message}
+              </p>
+            )}
+
+            <button
+              className="modal-pay-btn"
+              onClick={handlePayNow}
+              disabled={paying}
+            >
+              {paying
+                ? "CONNECTING TO STRIPE..."
+                : `PROCEED TO PAYMENT · €${total.toFixed(2)}`}
+            </button>
+
+            <p className="secure-payment">
+              🔒 Secure checkout powered by Stripe
+            </p>
+
+            <button
+              className="modal-cancel"
+              onClick={closeModal}
+              disabled={paying}
+            >
+              Cancel Booking
+            </button>
+
+          </div>
         </div>
-      </div>
+      )}
     </div>
 
     </>
