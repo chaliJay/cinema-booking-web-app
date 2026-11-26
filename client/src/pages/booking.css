@@ -1,55 +1,995 @@
-.booking-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+/* =========================================
+   RIO CINEMA - MOVIES PAGE
+========================================= */
+
+:root {
+    --gold: #d6ad55;
+    --gold-light: #f1d58d;
+    --black: #080808;
+    --dark: #101010;
+    --card: #151515;
+    --text: #ffffff;
+    --muted: #aaa;
 }
 
-.booking-content {
-    background: white;
-    color: #222;
-    padding: 30px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+/* GENERAL */
+
+.movies-page {
+    background: var(--black);
+    color: var(--text);
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
 }
 
-.booking-content h2 {
-    margin-top: 0;
-}
-
-.booking-content input {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    margin: 15px 0;
+.movies-page * {
     box-sizing: border-box;
 }
 
-.booking-content button {
-    padding: 12px 20px;
-    margin: 5px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
+html {
+    scroll-behavior: smooth;
 }
 
-#payNowBtn {
-    background: #176b45;
+/* =========================================
+   HERO SECTION
+========================================= */
+
+.movies-hero {
+    min-height: 490px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 80px 9%;
+    overflow: hidden;
+
+    background:
+        linear-gradient(90deg,
+            rgba(0, 0, 0, 0.96) 0%,
+            rgba(0, 0, 0, 0.82) 45%,
+            rgba(0, 0, 0, 0.35) 100%),
+        url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1800") center/cover no-repeat;
+}
+
+.movies-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(0deg,
+            var(--black),
+            transparent 35%,
+            transparent 75%,
+            rgba(0, 0, 0, 0.3));
+}
+
+.movies-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+}
+
+.movies-eyebrow,
+.section-eyebrow {
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+}
+
+.movies-hero h1 {
+    font-size: clamp(40px, 6vw, 70px);
+    line-height: 1.12;
+    margin: 23px 0;
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.movies-hero h1 span {
+    display: block;
+    color: var(--gold);
+}
+
+.movies-hero p {
+    max-width: 530px;
+    color: #ccc;
+    font-size: 16px;
+    line-height: 1.9;
+}
+
+.hero-explore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: 25px;
+    padding: 15px 25px;
+    background: var(--gold);
+    color: #080808;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.hero-explore-btn:hover {
+    background: var(--gold-light);
+    transform: translateY(-3px);
+}
+
+/* =========================================
+   MOVIE SECTION
+========================================= */
+
+.movie-section {
+    max-width: 1450px;
+    margin: auto;
+    padding: 85px 6%;
+}
+
+.movie-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 38px;
+}
+
+.movie-section-heading h2 {
+    font-size: clamp(28px, 4vw, 43px);
+    margin: 15px 0 10px;
+    letter-spacing: -1px;
+}
+
+.movie-section-heading h2 span {
+    color: var(--gold);
+}
+
+.movie-section-heading p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.movie-count {
+    width: 78px;
+    height: 78px;
+    border: 1px solid rgba(214, 173, 85, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.movie-count span {
+    color: var(--gold);
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.movie-count small {
+    color: #aaa;
+    font-size: 9px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+/* =========================================
+   SEARCH AND FILTER
+========================================= */
+
+.movie-toolbar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 40px;
+    padding: 18px;
+    background: #121212;
+    border: 1px solid #292929;
+}
+
+.movie-search {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px;
+    height: 49px;
+    background: #080808;
+    border: 1px solid #333;
+    transition: 0.3s;
+}
+
+.movie-search:focus-within {
+    border-color: var(--gold);
+}
+
+.search-icon {
+    color: var(--gold);
+    font-size: 27px;
+}
+
+.movie-search input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 14px;
+}
+
+.movie-search input::placeholder {
+    color: #777;
+}
+
+.clear-search {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.movie-filter select {
+    height: 49px;
+    min-width: 155px;
+    padding: 0 14px;
+    background: #080808;
+    border: 1px solid #333;
+    color: white;
+    outline: none;
+    cursor: pointer;
+}
+
+.movie-filter select:focus {
+    border-color: var(--gold);
+}
+
+.movie-reset-btn {
+    height: 49px;
+    padding: 0 23px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.movie-reset-btn:hover {
+    background: var(--gold);
+    color: #080808;
+}
+
+/* =========================================
+   MOVIE GRID
+========================================= */
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+}
+
+.premium-movie-card {
+    background: var(--card);
+    border: 1px solid #242424;
+    overflow: hidden;
+    transition: transform 0.35s, border-color 0.35s;
+    min-width: 0;
+}
+
+.premium-movie-card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(214, 173, 85, 0.65);
+}
+
+/* POSTER */
+
+.movie-poster {
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    background: #222;
+}
+
+.movie-poster>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s;
+}
+
+.premium-movie-card:hover .movie-poster>img {
+    transform: scale(1.06);
+}
+
+.poster-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg,
+            rgba(0, 0, 0, 0.97) 0%,
+            rgba(0, 0, 0, 0.3) 55%,
+            transparent 100%);
+}
+
+.movie-age {
+    position: absolute;
+    top: 17px;
+    left: 17px;
+    padding: 7px 12px;
+    background: var(--gold);
+    color: #080808;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.poster-details {
+    position: absolute;
+    bottom: 23px;
+    left: 22px;
+    right: 22px;
+}
+
+.poster-label {
+    color: var(--gold);
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.poster-details h3 {
+    font-size: 25px;
+    margin: 10px 0 17px;
+    line-height: 1.25;
+}
+
+.poster-book-btn {
+    background: var(--gold);
+    color: #080808;
+    border: none;
+    padding: 12px 16px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.poster-book-btn span {
+    margin-left: 10px;
+}
+
+.poster-book-btn:hover {
+    background: white;
+}
+
+/* MOVIE INFORMATION */
+
+.movie-card-info {
+    padding: 22px;
+}
+
+.movie-card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.movie-card-title-row h3 {
+    font-size: 19px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.movie-id {
+    color: var(--gold);
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.movie-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.movie-meta span {
+    padding: 6px 9px;
+    background: #242424;
+    color: #ccc;
+    font-size: 10px;
+    border: 1px solid #333;
+}
+
+.movie-description {
+    min-height: 45px;
+    color: #999;
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 16px 0;
+}
+
+.movie-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 17px;
+    border-top: 1px solid #303030;
+}
+
+.movie-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.movie-price small {
+    font-size: 9px;
+    color: #888;
+    letter-spacing: 1px;
+}
+
+.movie-price strong {
+    font-size: 20px;
+    color: var(--gold);
+}
+
+.book-btn {
+    padding: 12px 17px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+
+.book-btn:hover {
+    background: var(--gold);
+    color: #080808;
+}
+
+.book-btn span {
+    margin-left: 8px;
+}
+
+/* =========================================
+   LOADING / EMPTY / ERROR
+========================================= */
+
+.movie-status {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.movie-status p {
+    color: #999;
+    line-height: 1.7;
+}
+
+.movie-spinner {
+    height: 38px;
+    width: 38px;
+    border: 3px solid #333;
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: movieSpin 0.8s linear infinite;
+}
+
+@keyframes movieSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.no-movies>span {
+    font-size: 38px;
+    color: var(--gold);
+}
+
+.no-movies h3,
+.movie-error h3 {
+    font-size: 24px;
+}
+
+.no-movies button,
+.movie-error button {
+    background: var(--gold);
+    color: #080808;
+    border: none;
+    padding: 13px 23px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* =========================================
+   CINEMA EXPERIENCE
+========================================= */
+
+.movies-experience {
+    margin: 0 6% 85px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 55px 20px;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.83), rgba(0, 0, 0, 0.9)),
+        url("https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1600") center/cover no-repeat;
+    border: 1px solid rgba(214, 173, 85, 0.35);
+}
+
+.experience-content {
+    max-width: 700px;
+}
+
+.experience-content>span {
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.experience-content h2 {
+    font-size: clamp(28px, 4vw, 43px);
+    line-height: 1.3;
+    margin: 18px 0;
+}
+
+.experience-content h2 em {
+    display: block;
+    color: var(--gold);
+    font-style: italic;
+}
+
+.experience-content p {
+    color: #bbb;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   BOOKING MODAL
+========================================= */
+
+.booking-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.86);
+    backdrop-filter: blur(7px);
+    overflow-y: auto;
+}
+
+.booking-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    padding: 38px;
+    background: #141414;
+    border: 1px solid rgba(214, 173, 85, 0.65);
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+    animation: modalAppear 0.3s ease;
+    margin: auto;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 13px;
+    right: 17px;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 29px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: var(--gold);
+}
+
+.modal-eyebrow {
+    display: block;
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.booking-content>h2 {
+    font-size: 30px;
+    margin: 0 0 25px;
+}
+
+.modal-movie {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 15px;
+    background: #202020;
+    border: 1px solid #303030;
+}
+
+.modal-movie img {
+    width: 65px;
+    height: 90px;
+    object-fit: cover;
+}
+
+.modal-movie h3 {
+    font-size: 17px;
+    margin: 0 0 9px;
+}
+
+.modal-movie p {
+    color: #999;
+    font-size: 12px;
+    margin: 0;
+}
+
+.ticket-selection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 27px 0;
+}
+
+.ticket-selection label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.ticket-selection p {
+    color: #888;
+    font-size: 11px;
+    margin: 7px 0 0;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #222;
+    padding: 6px;
+}
+
+.quantity-control button {
+    height: 32px;
+    width: 32px;
+    background: #333;
+    border: none;
+    color: var(--gold);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.quantity-control button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.quantity-control span {
+    min-width: 18px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.price-summary {
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    padding: 17px 0;
+}
+
+.price-summary>div {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.price-summary strong {
     color: white;
 }
 
-#closeModalBtn {
-    background: #ddd;
-    color: #222;
+.price-summary .total-row {
+    border-top: 1px solid #333;
+    padding-top: 17px;
+    margin-top: 17px;
+    color: white;
+    font-size: 16px;
 }
 
-#bookingMessage {
-    margin-top: 12px;
-    color: #c0392b;
+.total-row strong {
+    color: var(--gold);
+    font-size: 23px;
+}
+
+.modal-pay-btn {
+    width: 100%;
+    padding: 17px 12px;
+    margin-top: 25px;
+    border: none;
+    background: var(--gold);
+    color: #080808;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.modal-pay-btn:hover {
+    background: var(--gold-light);
+}
+
+.modal-pay-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.secure-payment {
+    text-align: center;
+    color: #888;
+    font-size: 11px;
+    margin: 17px 0;
+}
+
+.booking-message {
+    color: #ff7777;
+    background: rgba(255, 0, 0, 0.08);
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.modal-cancel {
+    display: block;
+    margin: 10px auto 0;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.modal-cancel:hover {
+    color: white;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.movies-footer {
+    padding: 50px 20px 25px;
+    text-align: center;
+    background: #050505;
+    border-top: 1px solid rgba(214, 173, 85, 0.5);
+}
+
+.movies-footer h3 {
+    font-size: 25px;
+    letter-spacing: 4px;
+    margin: 0;
+}
+
+.movies-footer h3 span {
+    color: var(--gold);
+}
+
+.movies-footer p {
+    color: #999;
+    font-size: 13px;
+    margin: 15px 0 25px;
+}
+
+.footer-line {
+    width: 80%;
+    max-width: 500px;
+    height: 1px;
+    background: #292929;
+    margin: 0 auto 22px;
+}
+
+.movies-footer small {
+    color: #777;
+    font-size: 11px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 1050px) {
+    .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .movie-poster {
+        height: 350px;
+    }
+}
+
+@media (max-width: 700px) {
+    .movies-hero {
+        min-height: 410px;
+        padding: 65px 7%;
+    }
+
+    .movies-hero h1 {
+        font-size: 43px;
+    }
+
+    .movie-section {
+        padding: 60px 5%;
+    }
+
+    .movie-section-heading {
+        align-items: flex-start;
+    }
+
+    .movie-count {
+        width: 62px;
+        height: 62px;
+    }
+
+    .movie-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px;
+    }
+
+    .movie-search {
+        width: 100%;
+    }
+
+    .movie-filter select,
+    .movie-reset-btn {
+        width: 100%;
+    }
+
+    .movie-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .movie-poster {
+        height: 430px;
+    }
+
+    .movies-experience {
+        margin: 0 5% 55px;
+    }
+
+    .booking-content {
+        padding: 30px 22px;
+    }
+}
+
+@media (max-width: 400px) {
+    .movies-hero h1 {
+        font-size: 36px;
+    }
+
+    .movie-poster {
+        height: 350px;
+    }
+
+    .movie-card-info {
+        padding: 16px;
+    }
+
+    .movie-card-bottom {
+        align-items: flex-start;
+    }
+
+    .book-btn {
+        padding: 11px;
+        font-size: 11px;
+    }
+
+    .ticket-selection {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* =========================================
+   FIX: MOVIE POSTER FILLING THE CARD
+========================================= */
+
+/* Make the movie poster container fill the card */
+.movie-grid .premium-movie-card .movie-poster {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 420px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    grid-column: 1 / -1;
+}
+
+/* Make the actual image fill the complete container */
+.movie-grid .premium-movie-card .movie-poster img {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+
+/* Make overlay cover the complete poster */
+.movie-grid .premium-movie-card .poster-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Keep poster text and button inside the image */
+.movie-grid .premium-movie-card .poster-details {
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 23px !important;
+    width: auto !important;
+    z-index: 2;
+}
+
+/* Keep movie information full width */
+.movie-grid .premium-movie-card .movie-card-info {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Responsive poster height */
+@media (max-width: 700px) {
+    .movie-grid .premium-movie-card .movie-poster {
+        height: 400px !important;
+    }
 }
