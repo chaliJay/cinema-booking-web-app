@@ -17,7 +17,7 @@
 .seat-screen {
   width: 700px;
   height: 100px;
-  border-top: 4px solid #c81111;
+  border-top: 4px solid #daa520;
   border-radius: 50% 50% 0 0;
 }
 
@@ -95,4 +95,41 @@
   border: 1px dashed #666;
   color: #555;
   cursor: not-allowed;
+}
+
+.seat-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+}
+
+.seat-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.seat-side {
+  flex: 0 0 500px;
+  position: sticky;
+  top: 20px;
+  width: 100%;
+  padding: 38px;
+  background: #141414;
+  border: 1px solid rgba(214, 173, 85, 0.65);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+  margin: auto;
+}
+
+/* stack under the seats on small screens */
+@media (max-width: 800px) {
+  .seat-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .seat-side {
+    flex: none;
+    position: static;
+  }
 }

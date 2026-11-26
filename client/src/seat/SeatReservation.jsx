@@ -147,54 +147,74 @@ export default function SeatReservation() {
     <Header />
 
     <div className="seat-page">
-      <h2>{movie?.title || "Select Your Seat"}</h2>
-      <p className="seat-hall">
-        {theater?.name} | {show.day} {show.time}
-      </p>
+      <div className="seat-layout">
+        <div className="seat-main">
+          <div className="seat-screen"></div>
+          <p className="seat-screen-text">SCREEN SIDE</p>
 
-      <div className="seat-screen"></div>
-      <p className="seat-screen-text">SCREEN SIDE</p>
+          <div>
+            {ROWS.map((row) => (
+              <div className="seat-row" key={row}>
+                <span className="seat-row-label">{row}</span>
 
-      <div>
-        {ROWS.map((row) => (
-          <div className="seat-row" key={row}>
-            <span className="seat-row-label">{row}</span>
-
-            {ALL_SEATS.filter((s) => s.row === row).map((seat) => {
-              const isBooked = booked.includes(seat.id);
-              const isSelected = selected.includes(seat.id);
-              const isRestricted = restricted.includes(seat.id);
-              return (
-                <button
-                  key={seat.id}
-                  disabled={isBooked || isRestricted}
-                  title={isRestricted ? "Admin only" : ""}
-                  className={`seat-btn ${isSelected ? "selected" : ""} ${
-                    isBooked ? "booked" : ""
-                  } ${isRestricted ? "restricted" : ""}`}
-                  onClick={() => toggleSeat(seat.id)}
-                >
-                  {seat.number}
-                </button>
-              );
-            })}
+                {ALL_SEATS.filter((s) => s.row === row).map((seat) => {
+                  const isBooked = booked.includes(seat.id);
+                  const isSelected = selected.includes(seat.id);
+                  const isRestricted = restricted.includes(seat.id);
+                  return (
+                    <button
+                      key={seat.id}
+                      disabled={isBooked || isRestricted}
+                      title={isRestricted ? "Admin only" : ""}
+                      className={`seat-btn ${isSelected ? "selected" : ""} ${
+                        isBooked ? "booked" : ""
+                      } ${isRestricted ? "restricted" : ""}`}
+                      onClick={() => toggleSeat(seat.id)}
+                    >
+                      {seat.number}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
-        ))}
+
+          <p className="seat-info">
+            Selected: {selected.length ? selected.length + " seat(s)" : "none"}
+          </p>
+
+          <button
+            className="seat-confirm-btn"
+            onClick={openModal}
+            disabled={selected.length === 0}
+          >
+            Confirm Booking
+          </button>
+        </div>
+
+        {/* RIGHT: movie info */}
+        {movie && (
+          <aside className="seat-side">
+            <span className="modal-eyebrow">RIO CINEMA EXPERIENCE</span>
+
+            <h2 className="seat-hall">
+              {theater?.name} | {show.day} {show.time}
+            </h2>
+
+            <div className="modal-movie">
+              <img src={movie.poster_url} alt={movie.title} />
+              <div>
+                <h3>{movie.title}</h3>
+                <p>
+                  {movie.age_rating || "Movie"}
+                  {movie.runtime_min ? ` • ${movie.runtime_min} min` : ""}
+                </p>
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
 
-      <p className="seat-info">
-        Selected: {selected.length ? selected.length + " seat(s)" : "none"}
-      </p>
-
-      <button
-        className="seat-confirm-btn"
-        onClick={openModal}
-        disabled={selected.length === 0}
-      >
-        Confirm Booking
-      </button>
-
-      
       {/* BOOKING MODAL */}
       {modalOpen && movie && (
         <div
