@@ -8,8 +8,8 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-//const API_URL ="http://localhost:5000";
+// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+const API_URL ="http://localhost:5000";
 
 // Stripe setup
 if (!process.env.STRIPE_SECRET_KEY) {

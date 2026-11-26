@@ -4,8 +4,8 @@ import "./SeatReservation.css";
 import "../pages/booking.css";
 import Header from "../pages/Header.jsx";
 
-const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-//const API = "http://localhost:5000";
+// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
+const API = "http://localhost:5000";
 
 const ROWS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const SEATS_PER_ROW = 10;
