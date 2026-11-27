@@ -185,7 +185,7 @@ SELECT v.title, v.poster, '', v.age, v.mins
 FROM (VALUES
   ('Angry Bird',  'https://a3s.fi/swift/v1/rio_cinema/angry_bird.jpg', 'K12', 118),
   ('Dooms Days',  'https://a3s.fi/swift/v1/rio_cinema/doomsday.jpg',   'K7',  104),
-  ('Red Curtain', 'https://a3s.fi/swift/v1/rio_cinema/gollum.jpg',     'K16', 131)
+  ('Gollum', 'https://a3s.fi/swift/v1/rio_cinema/gollum.jpg',     'K16', 131)
 ) AS v(title, poster, age, mins)
 WHERE NOT EXISTS (SELECT 1 FROM movies m WHERE m.title = v.title);
 
@@ -197,7 +197,7 @@ FROM movies m
 CROSS JOIN rooms r
 CROSS JOIN generate_series(0, 2) AS d
 CROSS JOIN (VALUES ('16:30'), ('19:30')) AS x(t)
-WHERE m.title IN ('Angry Bird', 'Dooms Days', 'Red Curtain')
+WHERE m.title IN ('Angry Bird', 'Dooms Days', 'Gollum')
   AND NOT EXISTS (SELECT 1 FROM shows s
                   WHERE s.room_id = r.id AND s.movie_id = m.id
                     AND s.start_at = current_date + d * interval '1 day' + x.t::time);
