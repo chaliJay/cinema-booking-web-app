@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header.jsx";
 import "./ShowSelect.css";
-
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-const API_URL = "http://localhost:5000";
+import API_URL from "../config.js";
 
 export default function ShowSelect() {
   const navigate = useNavigate();

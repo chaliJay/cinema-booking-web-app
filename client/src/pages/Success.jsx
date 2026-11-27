@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-const API_URL ="http://localhost:5000";
+import API_URL from "../config.js";
 
 
 export default function Success() {

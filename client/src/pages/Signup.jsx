@@ -3,9 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "./Header.jsx";
 import "./auth.css";
+import API_URL from "../config.js";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
 export default function Signup() {
   const navigate = useNavigate();
 

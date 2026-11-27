@@ -3,9 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./SeatReservation.css";
 import "../pages/booking.css";
 import Header from "../pages/Header.jsx";
-
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
-const API = "http://localhost:5000";
+import API_URL from "../config.js";
 
 const ROWS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const SEATS_PER_ROW = 10;
@@ -45,7 +43,7 @@ export default function SeatReservation() {
 
   // load booked seats for this show
   const loadBooked = async () => {
-    const res = await fetch(`${API}/api/shows/${show.id}/booked-seats`);
+    const res = await fetch(`${API_URL}/api/shows/${show.id}/booked-seats`);
     const data = await res.json();
     const ids = ALL_SEATS.filter((s) =>
       data.some(
@@ -56,7 +54,7 @@ export default function SeatReservation() {
   };
 
   const loadRestricted = async () => {
-    const res = await fetch(`${API}/api/shows/${show.id}/restricted-seats`);
+    const res = await fetch(`${API_URL}/api/shows/${show.id}/restricted-seats`);
     const data = await res.json();
     const ids = ALL_SEATS.filter((s) =>
       data.some(
@@ -109,7 +107,7 @@ export default function SeatReservation() {
       number: s.number,
     }));
 
-    const res = await fetch(`${API}/api/bookings`, {
+    const res = await fetch(`${API_URL}/api/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ showId: show.id, seats }),
@@ -125,7 +123,7 @@ export default function SeatReservation() {
     try {
       await saveBooking(); // 1. save to the database
 
-      const response = await fetch(`${API}/api/create-checkout-session`, {
+      const response = await fetch(`${API_URL}/api/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ movieId: movie?.id, quantity: selected.length }),

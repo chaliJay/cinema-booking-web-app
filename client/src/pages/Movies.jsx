@@ -3,14 +3,9 @@ import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 import "./booking.css";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../config.js";
 
 const ticketPrice = 12;
-
-// Local development
-const API_URL = "http://localhost:5000";
-
-// For deployment, use:
-// const API_URL = "https://cinema-booking-web-app-server-rio-cinema-web-app.2.rahtiapp.fi";
 
 export default function Movies() {
   const navigate = useNavigate();

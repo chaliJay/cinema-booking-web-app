@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header.jsx";
 import "./account.css";
-
-const API_URL = "http://localhost:5000";
+import API_URL from "../config.js";
 
 export default function Account() {
   const navigate = useNavigate();

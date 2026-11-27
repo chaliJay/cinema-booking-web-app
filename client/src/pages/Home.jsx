@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import Header from "./Header.jsx";
 import { useNavigate } from "react-router-dom";
 import "./home.css";
-
-const API_URL = "http://localhost:5000";
+import API_URL from "../config.js";
 
 export default function Home() {
   const navigate = useNavigate();
